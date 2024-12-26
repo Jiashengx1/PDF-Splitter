@@ -49,3 +49,55 @@ python pdf_splitter.py <输入PDF文件路径> [-s <最大文件大小(MB)> | -p
     ```bash
     python pdf_splitter.py input.pdf -s 10 -o custom_output_directory
     ```
+
+# PDF Splitter Tool
+
+This is a PDF splitter tool written using the `pikepdf` library, which supports splitting PDF files based on specified page numbers or file sizes. The tool is configured via command-line arguments, making it flexible and suitable for scenarios where large files need to be split into multiple smaller files.
+
+## Features
+
+1. **Split by Page Count**: Split the PDF file into multiple smaller files based on a specified number of pages per file.
+2. **Split by File Size**: Split the PDF file based on a maximum file size (in MB). The tool ensures that each output file does not exceed the specified size. It uses binary search to optimize performance and reduce unnecessary temporary file generation.
+
+## Dependencies
+
+Make sure you have `pikepdf` installed, which is a powerful Python PDF library. You can install it using the following command:
+
+```bash
+pip install pikepdf
+```
+
+## Usage
+
+### Basic Command
+
+```bash
+python pdf_splitter.py <input_pdf_path> [-s <max_file_size(MB)> | -p <pages_per_file>] [-o <output_directory>]
+```
+
+### Parameter Descriptions
+
+- `input_pdf`: The path to the input PDF file.
+- `-s`, `--size`: The maximum file size (in MB) for splitting, supports decimal values.
+- `-p`, `--pages`: The number of pages per file when splitting by page count.
+- `-o`, `--output`: The output directory. If not specified, the output files will be saved in the same directory as the input PDF.
+
+### Examples
+
+1. **Split PDF by File Size**: Split the file into chunks with a maximum size of 20MB each.
+
+    ```bash
+    python pdf_splitter.py input.pdf -s 20 -o output_directory
+    ```
+
+2. **Split PDF by Page Count**: Split the file into chunks, each containing 10 pages.
+
+    ```bash
+    python pdf_splitter.py input.pdf -p 10 -o output_directory
+    ```
+
+3. **Custom Output Directory**:
+
+    ```bash
+    python pdf_splitter.py input.pdf -s 10 -o custom_output_directory
+    ```
