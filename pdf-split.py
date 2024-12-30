@@ -76,32 +76,83 @@ def split_pdf_by_size(input_pdf_path, output_dir, max_size_mb):
             split_count += 1
             current_page = best
 
+def merge_pdfs(input_pdf_paths, output_dir, output_file_name=None):
+    """
+    合并多个PDF文件为一个
+    """
+    if not input_pdf_paths:
+        print("没有提供要合并的PDF文件。")
+        return
+
+    merged_pdf = pikepdf.Pdf.new()
+
+    for pdf_path in input_pdf_paths:
+        if not os.path.exists(pdf_path):
+            print(f"文件不存在: {pdf_path}")
+            return
+        with pikepdf.Pdf.open(pdf_path) as pdf:
+            merged_pdf.pages.extend(pdf.pages)
+    
+    if not output_file_name:
+        first_base = os.path.splitext(os.path.basename(input_pdf_paths[0]))[0]
+        output_file_name = f"{first_base}_merge.pdf"
+    
+    output_path = os.path.join(output_dir, output_file_name)
+    merged_pdf.save(output_path)
+    
+    file_size = os.path.getsize(output_path) / (1024 * 1024)  # 转换为MB
+    print(f"合并后的文件: {output_path} (大小: {file_size:.2f} MB)")
+
 def main():
-    parser = argparse.ArgumentParser(description="PDF分割工具")
-    parser.add_argument("input_pdf", help="输入的PDF文件路径")
+    parser = argparse.ArgumentParser(description="PDF分割与合并工具")
+    parser.add_argument("input_pdfs", nargs='+', help="输入的PDF文件路径。单个文件用于分割，多个文件用于合并。")
+    parser.add_argument("-m", "--merge", action="store_true", help="合并多个PDF文件")
     parser.add_argument("-s", "--size", type=float, help="按大小分割的最大文件大小 (MB)，支持小数")
     parser.add_argument("-p", "--pages", type=int, help="按页数分割的每个文件的页数")
     parser.add_argument("-o", "--output", help="输出目录，默认与输入PDF相同", default=None)
+    parser.add_argument("-f", "--filename", help="合并后的输出文件名，仅在合并时使用", default=None)
     
     args = parser.parse_args()
     
-    if not os.path.exists(args.input_pdf):
-        print("输入的PDF文件不存在!")
-        return
-    
-    # 如果没有指定输出目录，默认输出到输入PDF文件的目录
-    if args.output is None:
-        args.output = os.path.dirname(args.input_pdf)
-    
-    if not os.path.exists(args.output):
-        os.makedirs(args.output)
-    
-    if args.size:
-        split_pdf_by_size(args.input_pdf, args.output, args.size)
-    elif args.pages:
-        split_pdf_by_pages(args.input_pdf, args.output, args.pages)
+    if args.merge:
+        # 合并操作
+        if len(args.input_pdfs) < 2:
+            print("合并操作需要至少两个PDF文件。")
+            return
+        
+        # 如果没有指定输出目录，默认输出到第一个输入PDF文件的目录
+        if args.output is None:
+            args.output = os.path.dirname(args.input_pdfs[0])
+        
+        if not os.path.exists(args.output):
+            os.makedirs(args.output)
+        
+        merge_pdfs(args.input_pdfs, args.output, args.filename)
     else:
-        print("请提供分割方式：按页数(-p)或按大小(-s)。")
+        # 分割操作
+        if len(args.input_pdfs) != 1:
+            print("分割操作需要一个输入PDF文件。")
+            return
+        
+        input_pdf = args.input_pdfs[0]
+        
+        if not os.path.exists(input_pdf):
+            print("输入的PDF文件不存在!")
+            return
+        
+        # 如果没有指定输出目录，默认输出到输入PDF文件的目录
+        if args.output is None:
+            args.output = os.path.dirname(input_pdf)
+        
+        if not os.path.exists(args.output):
+            os.makedirs(args.output)
+        
+        if args.size:
+            split_pdf_by_size(input_pdf, args.output, args.size)
+        elif args.pages:
+            split_pdf_by_pages(input_pdf, args.output, args.pages)
+        else:
+            print("请提供分割方式：按页数(-p)或按大小(-s)。")
 
 if __name__ == "__main__":
     main()
