@@ -10,7 +10,7 @@
 
 ## 安装依赖
 
-确保你已经安装了 `pikepdf`，它是一个强大的 Python PDF 库。你可以通过以下命令安装：
+确保你已经安装了 `pikepdf`。你可以通过以下命令安装：
 
 ```bash
 pip install pikepdf
